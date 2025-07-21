@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import ReactMarkdown from "react-markdown"
 
-export default function NewArticlePage() {
+function NewArticleContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -163,5 +163,13 @@ export default function NewArticlePage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function NewArticlePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <NewArticleContent />
+    </Suspense>
   )
 }
