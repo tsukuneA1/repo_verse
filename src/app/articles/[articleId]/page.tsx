@@ -134,7 +134,7 @@ export default function ArticlePage() {
           </header>
 
           <div className="prose prose-lg max-w-none">
-            <ReactMarkdown className="text-gray-800 leading-relaxed">
+            <ReactMarkdown>
               {article.content}
             </ReactMarkdown>
           </div>
