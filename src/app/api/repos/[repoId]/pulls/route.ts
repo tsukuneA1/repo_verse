@@ -56,7 +56,7 @@ export async function GET(
       body: pr.body,
       merged_at: pr.merged_at,
       user: pr.user,
-      html_url: pr.html_url,
+      html_url: pr.html_url
     })))
 
     return NextResponse.json({
