@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// ユーザー情報
+model User {
+  id               String    @id @default(cuid())
+  name             String?
+  email            String?   @unique
+  image            String?   // GitHubのプロフィール画像URL
+  githubAccountUrl String    @unique
+  
+  posts            Post[]    // ユーザーが作成した投稿
+  repositories     Repo[]    // ユーザーが登録したリポジトリ
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// ユーザーが登録したリポジトリ情報
+model Repo {
+  id        String   @id @default(cuid())
+  url       String   @unique // "https://github.com/facebook/react"
+  name      String   // "facebook/react"
+  owner     String   // "facebook"
+  
+  userId    String   // このリポジトリを登録したユーザーのID
+  user      User     @relation(fields: [userId], references: [id])
+  
+  posts     Post[]   // このリポジトリから生成された投稿
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// AIによって生成・ユーザーが編集する記事
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text // 長文対応
+  
+  authorId  String   // 投稿を作成・編集したユーザーのID
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  // どのリポジトリについての投稿か (任意)
+  repoId    String?
+  repo      Repo?    @relation(fields: [repoId], references: [id])
+  
+  // この投稿の元になったPR情報
+  sourcePullRequests PullRequest[]
+
+  published Boolean  @default(false) // 公開/非公開の状態
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 投稿の元になったPR情報
+model PullRequest {
+  id          String   @id @default(cuid())
+  url         String   @unique // PRのURL
+  title       String
+  number      Int      // PR番号
+  
+  // このPRがどの投稿の元になったか
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
